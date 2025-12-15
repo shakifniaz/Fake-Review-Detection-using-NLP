@@ -7,14 +7,10 @@ import streamlit as st
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
-# If you get LookupError on first run, uncomment once:
 # nltk.download("punkt")
 # nltk.download("punkt_tab")
 # nltk.download("stopwords")
 
-# -----------------------------
-# Page + CSS
-# -----------------------------
 st.set_page_config(page_title="Fake Review Detector", page_icon="🕵️", layout="centered")
 
 st.markdown("""
@@ -33,7 +29,6 @@ html, body, p, span, label, div {
     color: var(--text-main) !important;
 }
 
-/* ===== NAVBAR ===== */
 .top-nav {
     position: fixed;
     top: 0;
@@ -60,13 +55,11 @@ html, body, p, span, label, div {
 
 header[data-testid="stHeader"] { background: transparent; }
 
-/* ===== HEADINGS ===== */
 h1, h2, h3, h4 {
     color: var(--accent) !important;
     font-weight: 800;
 }
 
-/* ===== TEXT AREA ===== */
 textarea {
     background-color: #ffffff !important;
     color: var(--text-main) !important;
@@ -76,7 +69,6 @@ textarea {
 }
 textarea::placeholder { color: #9ca3af !important; }
 
-/* ===== BUTTON ===== */
 .stButton > button {
     background-color: var(--accent);
     color: white !important;
@@ -92,14 +84,12 @@ textarea::placeholder { color: #9ca3af !important; }
     transform: scale(1.02);
 }
 
-/* ===== PROGRESS BARS ===== */
 .fake-bar > div > div > div { background-color: var(--accent) !important; }
 .fake-bar > div { background-color: #e5e7eb !important; }
 
 .real-bar > div > div > div { background-color: #3b82f6 !important; }
 .real-bar > div { background-color: #e5e7eb !important; }
 
-/* Pills */
 .pill {
   display:inline-block;
   padding:.25rem .6rem;
@@ -114,7 +104,6 @@ textarea::placeholder { color: #9ca3af !important; }
   color:#1d4ed8 !important;
 }
 
-/* ===== METRIC CARDS (rectangular, shadow) ===== */
 .metric-card {
     background: #ffffff;
     border: 1px solid rgba(229, 231, 235, 0.95);
@@ -134,7 +123,6 @@ textarea::placeholder { color: #9ca3af !important; }
     color: #111827 !important;
 }
 
-/* ===== SMALL INFO CARDS (Confidence / Risk) ===== */
 .info-card {
     background: #ffffff;
     border: 1px solid var(--border);
@@ -166,9 +154,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Load metrics + model
-# -----------------------------
 try:
     with open("model_metrics.json", "r") as f:
         metrics = json.load(f)
@@ -177,9 +162,6 @@ except FileNotFoundError:
 
 pipe = pickle.load(open("fake_reviews_pipe.pkl", "rb"))
 
-# -----------------------------
-# Preprocessing
-# -----------------------------
 ps = PorterStemmer()
 STOPWORDS = set(stopwords.words("english"))
 PUNCT = set(string.punctuation)
@@ -201,9 +183,6 @@ def featurize_single_review(raw_text: str) -> pd.DataFrame:
         "num_sentences": len(nltk.sent_tokenize(raw_text))
     }])
 
-# -----------------------------
-# Confidence + risk
-# -----------------------------
 def confidence_label_and_risk(p_cg: float):
     if p_cg >= 0.85:
         return "Very High", "High risk of Fake (CG)"
@@ -218,9 +197,6 @@ def confidence_label_and_risk(p_cg: float):
     else:
         return "High", "Low risk of Fake (likely Real OR)"
 
-# -----------------------------
-# Top contributing words
-# -----------------------------
 def get_top_contributing_words(pipe, transformed_text: str, topn=10):
     try:
         clf = pipe.named_steps["clf"]
@@ -256,9 +232,6 @@ def get_top_contributing_words(pipe, transformed_text: str, topn=10):
     except Exception:
         return [], []
 
-# -----------------------------
-# UI
-# -----------------------------
 col1, col2 = st.columns(2)
 
 acc_text = "N/A" if metrics.get("accuracy") is None else f"{metrics['accuracy']*100:.2f}%"
